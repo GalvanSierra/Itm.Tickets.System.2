@@ -15,10 +15,23 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Base de datos simulada
+var discounts = new List<Discount>
+{
+    new Discount("ITM50", 0.5m),
+    new Discount("ITM30", 0.3m)
+};
+
 app.MapGet("/api/discounts/{code}", (string code) =>
 {
-    // Lógica para obtener el descuento por código
+    var discount = discounts.FirstOrDefault(d =>
+        d.Code.Equals(code, StringComparison.OrdinalIgnoreCase));
+
+    return discount is null
+        ? Results.NotFound(new { message = $"Discount code '{code}' not found." })
+        : Results.Ok(discount);
 });
 
-
 app.Run();
+
+public record Discount(string Code, decimal Percentage);
